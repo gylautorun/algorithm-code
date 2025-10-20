@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>leetcode-最大二叉树</title>
+</head>
+<body>
+
+</body>
+
+<script>
+    // 给定一个不含重复元素的整数数组。一个以此数组构建的最大二叉树定义如下：
+    //
+    // 二叉树的根是数组中的最大元素。
+    // 左子树是通过数组中最大值左边部分构造出的最大二叉树。
+    // 右子树是通过数组中最大值右边部分构造出的最大二叉树。
+    // 通过给定的数组构建最大二叉树，并且输出这个树的根节点。
+    // 示例 ：
+
+    // 输入：[3,2,1,6,0,5]
+    //     输出：返回下面这棵树的根节点：
+    //
+    //         6
+    //       /   \
+    //      3     5
+    //      \    /
+    //       2  0
+    //        \
+    //         1
+
+    function TreeNode(val) {
+        this.val = val;
+        this.left = this.right = null;
+    }
+
+    var constructMaximumBinaryTree = function(nums = []) {
+        return maxTree(nums);
+    };
+
+    function maxTree(nums) {
+        if(!nums || !nums.length){
+            return null;
+        }
+        // maxIndex为当前数组中最大值的索引
+        let {max, maxIndex} = findMaxIndex(nums);
+        let root = new TreeNode(max);
+        let leftArr = nums.splice(0, maxIndex);
+        let rightArr = nums.splice(1);
+        root.left = maxTree(leftArr);
+        root.right = maxTree(rightArr);
+        return root;
+    }
+
+    function findMaxIndex(nums) {
+        let max = nums[0], maxIndex = 0;
+        for(let i = 1; i < nums.length; i++){
+            if(max < nums[i]){
+                max = nums[i];
+                maxIndex = i;
+            }
+        }
+
+        return {max, maxIndex};
+    }
+
+    // var constructMaximumBinaryTree = function(nums = []) {
+    //     return maxTree(nums, 0, nums.length - 1);
+    // };
+    //
+    // function maxTree(arrNums, l, r) {
+    //     if(l > r){
+    //         return null;
+    //     }
+    //     // maxIndex为当前数组中最大值的索引
+    //     let {max, maxIndex} = findMaxIndex(arrNums, l, r);
+    //     let root = new TreeNode(max);
+    //     root.left = maxTree(arrNums, l, maxIndex - 1);
+    //     root.right = maxTree(arrNums, maxIndex + 1, r);
+    //     return root;
+    // }
+    //
+    // function findMaxIndex(arrNums, l , r) {
+    //     let max = arrNums[l], maxIndex = l;
+    //     for(let i = l; i <= r; i++){
+    //         if(max < arrNums[i]){
+    //             max = arrNums[i];
+    //             maxIndex = i;
+    //         }
+    //     }
+    //
+    //     return {max, maxIndex};
+    // }
+
+
+
+    // var constructMaximumBinaryTree = function(nums = []) {
+    //   let result = null;
+    //   let l = nums.length;
+    //   for (let i = 0; i < l; i++) {
+    //     result = getMaxTree(result, nums[i]);
+    //   }
+    //   return result;
+    // };
+
+    // function getMaxTree(root, item) {
+    //     let node = new TreeNode(item);
+    //     if (!root) return node;
+
+    //     if (item > root.val) {
+    //       node.left = root;
+    //       return node;
+    //     } else {
+    //       root.right = getMaxTree(root.right, item);
+    //       return root;
+    //     }
+    //   }
+
+    console.log(constructMaximumBinaryTree([3,2,1,6,0,5]));
+</script>
+</html>

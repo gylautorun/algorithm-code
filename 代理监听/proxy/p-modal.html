@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang='en'>
+<head>
+    <meta charset='UTF-8'>
+    <title>Title</title>
+</head>
+<body>
+<input type='text' id='input' name=''>
+<div id='show'></div>
+<script>
+    const input = document.getElementById('input');
+    const div = document.getElementById('show');
+
+    let data = {
+        name: 'duyi',
+        valueObj: {
+            value: 'aaa'
+        }
+    }
+
+    function upData() {
+        div.innerText = data.name;
+    }
+
+    upData();
+    input.oninput = function () {
+        proxy.name = this.value;
+    }
+    let proxy = new Proxy(data, {
+        set (target, key, value, receiver) {
+            Reflect.set(target, key, value, receiver);
+            upData();
+        },
+        get (target, key, receiver) {
+            return Reflect.get(target, key, receiver);
+        }
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,65 @@
+<mxfile host="65bd71144e">
+    <diagram id="pqCumSTQt8CRR43lvlBb" name="第 1 页">
+        <mxGraphModel dx="555" dy="462" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="827" pageHeight="1169" background="#ffffff" math="0" shadow="0">
+            <root>
+                <mxCell id="0"/>
+                <mxCell id="1" parent="0"/>
+                <mxCell id="2" value="&lt;font style=&quot;background-color: rgb(255, 255, 255);&quot; color=&quot;#0e0101&quot;&gt;函数开始&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="60" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="12" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#150909;fontColor=#0e0101;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="3" target="10">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="30" y="110" as="targetPoint"/>
+                        <Array as="points">
+                            <mxPoint x="30" y="105"/>
+                            <mxPoint x="30" y="225"/>
+                        </Array>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="3" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;promise&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="90" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="4" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;引发错误&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="120" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="6" style="edgeStyle=none;html=1;exitX=0.5;exitY=1;exitDx=0;exitDy=0;fontColor=#0e0101;strokeColor=#150909;" edge="1" parent="1" source="5">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="115" y="210" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="5" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;函数结束&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="150" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="10" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;data&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="210" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="14" style="edgeStyle=orthogonalEdgeStyle;html=1;strokeColor=#150909;fontColor=#0e0101;" edge="1" parent="1" source="11">
+                    <mxGeometry relative="1" as="geometry">
+                        <mxPoint x="115" y="310" as="targetPoint"/>
+                    </mxGeometry>
+                </mxCell>
+                <mxCell id="21" style="edgeStyle=orthogonalEdgeStyle;html=1;entryX=0;entryY=0.5;entryDx=0;entryDy=0;strokeColor=#150909;fontColor=#0e0101;" edge="1" parent="1" source="11" target="15">
+                    <mxGeometry relative="1" as="geometry"/>
+                </mxCell>
+                <mxCell id="11" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;缓存 data&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="70" y="240" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="15" value="&lt;font style=&quot;background-color: rgb(255, 255, 255);&quot; color=&quot;#0e0101&quot;&gt;函数开始&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="270" y="60" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="16" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;promise&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="270" y="90" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="18" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;函数结束&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#fad9d5;strokeColor=#ae4132;" vertex="1" parent="1">
+                    <mxGeometry x="270" y="180" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="19" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;交付data&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="270" y="120" width="90" height="30" as="geometry"/>
+                </mxCell>
+                <mxCell id="20" value="&lt;font color=&quot;#0e0101&quot;&gt;&lt;span style=&quot;background-color: rgb(255, 255, 255);&quot;&gt;函数继续&lt;/span&gt;&lt;/font&gt;" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#b0e3e6;strokeColor=#0e8088;" vertex="1" parent="1">
+                    <mxGeometry x="270" y="150" width="90" height="30" as="geometry"/>
+                </mxCell>
+            </root>
+        </mxGraphModel>
+    </diagram>
+</mxfile>

@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+
+<script>
+    // function Pro(val) {
+    //     return new Promise((resolve, reject) => {
+    //         setTimeout(function() {
+    //             resolve(val)
+    //         }, 1000)
+    // })
+    // }
+    //
+    // async function log(arrs) {
+    //     for(const item of arrs) {
+    //         var response = await Pro(item);
+    //         console.log(response);
+    //     }
+    // }
+    //
+    // log([10, 20, 30])
+
+    // 继发
+    // async function loadData() {
+    //     var res1 = await fetch(url1);
+    //     var res2 = await fetch(url2);
+    //     var res3 = await fetch(url3);
+    //     return"whew all done";
+    // }
+    // or
+    // async function loadData(urls) {
+    //     for (const url of urls) {
+    //         const response = await fetch(url);
+    //         console.log(await response.text());
+    //     }
+    // }
+
+
+
+    // async 并发
+    // async function loadData() {
+    //     var res = await Promise.all([fetch(url1), fetch(url2), fetch(url3)]);
+    //     return"whew all done";
+    // }
+
+    // async function loadData(urls) {
+    //     // 并发读取 url
+    //     const textPromises = urls.map(async url => {
+    //         const response = await fetch(url);
+    //         return response.text();
+    //     });
+    //
+    //     // 按次序输出
+    //     for (const textPromise of textPromises) {
+    //         console.log(await textPromise);
+    //     }
+    // }
+
+
+    // for of方法能够遍历具有Symbol.iterator接口的同步迭代器数据，但是不能遍历异步迭代器。
+    // ES9新增的for await of可以用来遍历具有Symbol.asyncIterator方法的数据结构，也就是异步迭代器，且会等待前一个成员的状态改变后才会遍历到下一个成员，相当于async函数内部的await。
+    // for of遍历
+    function Gen (time) {
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                resolve(time)
+            }, time)
+        })
+    }
+    // async function test () { // 使用for await of遍历时，会等待前一个Promise对象的状态改变后，再遍历到下一个成员
+    //     let arr = [Gen(2000), Gen(100), Gen(3000)]    // 并发执行
+    //     for await (let item of arr) {
+    //         console.log(Date.now(), item)   // 按次序输出
+    //     }
+    // }
+    function test () { // 不能遍历异步迭代器
+        var arr = [Gen(2000), Gen(100), Gen(3000)]    // 并发执行
+        for (let item of arr) {
+            console.log(Date.now(), item.then(console.log))
+        }
+    }
+    test()
+    // 1576391094972 Promise {<pending>}
+    // 1576391094973 Promise {<pending>}
+    // 1576391094973 Promise {<pending>}
+    // Promise {<resolved>: undefined}
+    // 100
+    // 2000
+    // 3000
+
+</script>
+</html>

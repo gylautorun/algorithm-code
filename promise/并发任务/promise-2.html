@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+        // 实现 mergePromise 函数，把传进去的函数数组按顺序先后执行，并且把返回的数据先后放到数组 data 中
+    </script>
+</head>
+<body>
+
+</body>
+
+<script>
+    // 题目代码
+    function timeout(time) {
+        time = (time || 1) * 1000;
+        return new Promise(function (resolve, reject) {
+            setTimeout(function () {
+                resolve();
+            }, time)
+        })
+    }
+
+    var ajax1 = function () {
+        return timeout(2).then(function () {
+            console.log('1');
+            return 1;
+        })
+    }
+    var ajax2 = function () {
+        return timeout(1).then(function () {
+            console.log('2');
+            return 2;
+        })
+    }
+    var ajax3 = function () {
+        return timeout(2).then(function () {
+            console.log('3');
+            return 3;
+        })
+    }
+
+    mergePromise([ajax1, ajax2, ajax3]).then(function (data) {
+        console.log('done');
+        console.log(data); // data 为 [1, 2, 3]
+    });
+    // mergePromiseAsync([ajax1, ajax2, ajax3]).then(function (data) {
+    //     console.log('done');
+    //     console.log(data); // data 为 [1, 2, 3]
+    // });
+
+    // 要求分别输出
+    // 1
+    // 2
+    // 3
+    // done
+    // [1, 2, 3]
+
+    // 分析
+    // timeout是一个函数，这个函数执行后返回一个promise实例。
+    // ajax1 、ajax2、ajax3 都是函数，不过这些函数有一些特点，执行后都会会返回一个 新的promise实例。
+
+    // 请实现
+    function mergePromise(ajaxArray) {
+        ajaxArray = ajaxArray || [];
+
+        // 保存数组中的函数执行后的结果
+        var data = [];
+        // Promise.resolve方法调用时不带参数，直接返回一个resolved状态的 Promise 对象。
+        var sequence = Promise.resolve();
+
+        ajaxArray.forEach(function (ajax) {
+            // 第一次的 then 方法用来执行数组中的每个函数，
+            // 第二次的 then 方法接受数组中的函数执行后返回的结果，
+            // 并把结果添加到 data 中，然后把 data 返回。
+            sequence = sequence.then(ajax).then(function (res) {
+                data.push(res);
+                return data;
+            })
+        });
+        // 遍历结束后，返回一个 Promise，也就是 sequence， 他的 [[PromiseValue]] 值就是 data，
+        // 而 data（保存数组中的函数执行后的结果） 也会作为参数，传入下次调用的 then 方法中。
+
+        return sequence;
+
+    }
+
+    // const mergePromiseAsync = async (urls) => {
+    //     const arr = [];
+    //
+    //     // 并发执行
+    //     const textPromises = urls.map(url => {
+    //         return url();
+    //     });
+    //
+    //     // 按次序输出
+    //     for (const textPromise of textPromises) {
+    //         arr.push(await textPromise);
+    //     }
+    //
+    //     return arr
+    // };
+
+    // 大概思路如下：
+    // 全局定义一个promise实例sequence，循环遍历函数数组，每次循环更新sequence，
+    // 将要执行的函数item通过sequence的then方法进行串联，并且将执行结果推入data数组，
+    // 最后将更新的data返回，这样保证后面sequence调用then方法，
+    // 如何后面的函数需要使用data只需要将函数改为带参数的函数。
+
+</script>
+</html>

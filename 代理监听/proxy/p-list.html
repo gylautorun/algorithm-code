@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<ul class="js-todo-list"></ul>
+<div>
+    <input class="text-input">
+    <button class="add">add</button>
+</div>
+</body>
+</html>
+<script>
+    let todoData = [];
+
+    let todoDataProxy = new Proxy(todoData, {
+        set: (target, property, value) => {
+            Reflect.set(target, property, value);
+            if (property === 'length') {
+                return true;
+            }
+            todoListNode.render(value);
+            return true;
+        },
+        deleteProperty: (target, property) => {
+            Reflect.deleteProperty(target, property);
+            target.splice(property, 1);
+            todoListNode.remove(property);
+            return true;
+        } });
+
+
+    // template render logic start
+    const todoListNode = document.querySelector('.js-todo-list');
+
+    todoListNode.dataTemplate = [];
+    todoListNode.remove = function remove(index) {
+        this.dataTemplate.splice(index, 1);
+        this.innerHTML = this.dataTemplate.join('');
+    };
+    todoListNode.render = function render(data) {
+        const newDataTemplate = `
+    <li>
+      ${data}
+      <button data-todo=${data}>remove</button>
+    </li>
+  `;
+        this.dataTemplate.push(newDataTemplate);
+        this.innerHTML = this.dataTemplate.join('');
+    };
+
+    todoDataProxy.push('test2');
+
+
+
+    const inputNode = document.querySelector('.text-input');
+    const buttonNode = document.querySelector('.add');
+    inputNode.addEventListener('keyup', e => {
+        if (e.keyCode === 13) {
+            todoDataProxy.push(e.target.value);
+            e.target.value = '';
+        }
+    });
+
+    buttonNode.addEventListener('click', e => {
+        if (inputNode.value) {
+            todoDataProxy.push(inputNode.value);
+            inputNode.value = '';
+        }
+    });
+
+    todoListNode.addEventListener('click', e => {
+        if (e.target.nodeName === 'BUTTON') {
+            const removedTodoItem = e.target.dataset.todo;
+            const removedItemIndex = todoDataProxy.
+            findIndex(todo => todo === removedTodoItem);
+            delete todoDataProxy[removedItemIndex];
+        }
+    });
+</script>

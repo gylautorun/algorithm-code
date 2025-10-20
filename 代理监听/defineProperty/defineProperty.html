@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>define Array</title>
+</head>
+<body>
+
+</body>
+<script src="./arrayProto.js"></script>
+<script>
+    let obj = {
+        name:'李明',
+        age:18,
+        list:['睡觉', '吃饭', '上厕所'],
+        subObj: {
+            name: '哈哈'
+        }
+    }
+
+    // 响应式的函数
+    function defineProperty(obj, key, value){
+        observer(value); // 针对val是对象，递归检测
+        Object.defineProperty(obj, key, {
+            enumerable: true,
+            configurable: true,
+            get() {
+                // 读取方法
+                console.log('读取', key, '成功')
+                return value
+            },
+            set(newVal) {
+                // 赋值监听方法
+                if (newVal === value) return;
+                observer(newVal); // 监听用户传入对象
+                console.log('监听赋值成功', newVal)
+                value = newVal
+            }
+        })
+    }
+
+    // 遍历函数
+    function observer(obj) {
+        if (typeof obj !== 'object' || obj === null) {
+            return
+        }
+//        for (let key in obj) {
+//            // 给对象中的每一个方法都设置响应式
+//            defineProperty(obj, key, obj[key])
+//        }
+        if (Array.isArray(obj)) {
+            // 重写原型
+            obj.__proto__ = arrayProto();
+            // 传入的数据可能是多维度的,也需要执行响应式
+            for (let i = 0; i < obj.length; i++) {
+                observer(obj[i])
+            }
+        }
+        else {
+            for (let key in obj) {
+                // 给对象中的每一个方法都设置响应式
+                defineProperty(obj, key, obj[key])
+            }
+        }
+    }
+
+    function setProperty(obj, key, val) {
+        defineProperty(obj, key, val)
+    }
+
+    observer(obj);
+    setProperty(obj, 'setProperty', 'set value');
+
+</script>
+</html>

@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <script>
+        // 实现批量请求数据, 所有 url在 urls 中, 通过 max 参数控制请求并发度, 当所有请求结束后需要执行 callback 回调函数
+        // 发请求函数可以直接使用 fetch
+        /**
+         *
+         * @param urls: {Array: [string]}
+         * @param max: number
+         * @param callback: () => void
+         */
+        // function sendRequest(urls, max, callback) {
+        //
+        // }
+    </script>
+</head>
+<body>
+
+</body>
+
+<script>
+    // 题目代码
+    let urls = [
+        'https://www.kkkk1000.com/images/getImgData/getImgDatadata.jpg',
+        'https://www.kkkk1000.com/images/getImgData/gray.gif',
+        'https://www.kkkk1000.com/images/getImgData/Particle.gif',
+        'https://www.kkkk1000.com/images/getImgData/arithmetic.png',
+        'https://www.kkkk1000.com/images/getImgData/arithmetic2.gif',
+        'https://www.kkkk1000.com/images/getImgData/getImgDataError.jpg',
+        'https://www.kkkk1000.com/images/getImgData/arithmetic.gif',
+        'https://www.kkkk1000.com/images/wxQrCode2.png'
+    ];
+
+    function loadImg(url) {
+        return new Promise(function (resolve, reject) {
+            let img = new Image();
+            img.onload = function () {
+                console.log('一张图片加载完成, ', url);
+                resolve();
+            };
+            img.onerror = reject
+            img.src = url
+        })
+    }
+
+    // ==============================================
+    // 1递归
+    let count = 0;
+
+    //对加载图片的函数做处理，计数器叠加计数
+    function start1() {
+        count++;
+        console.log('并发数: ', count)
+        //条件判断，urls长度大于0继续，小于等于零说明图片加载完成
+        if (urls.length > 0 && count <= 3) {
+            //shift从数组中取出连接
+            loadImg(urls.shift())
+                .then(function () {
+                    //计数器递减
+                    count--
+                    //递归调用
+                }).then(start1)
+        }
+    }
+
+    // 优化
+    // 封装请求的异步函数,增加计数器功能
+    function request() {
+        count++;
+        console.log('并发数: ', count);
+        loadImg(urls.shift())
+            .then(function () {
+                count--
+            }).then(diaoDu)
+    }
+
+    // 负责调度的函数
+    function diaoDu() {
+        if (urls.length > 0 && count <= 3) {
+            request();
+        }
+    }
+
+    function async1() {
+        // 循环开启三次
+        for (let i = 0; i < 3; i++) {
+            // start1();
+            request();
+        }
+    }
+
+    // async1()
+
+
+    // ====================================================================================
+
+    let count2 = 0;
+    let locks = []; // 全局锁
+    let len = urls.length;
+
+    async function two() {
+
+        if (count2 >= 3) {
+            // 超过限制利用await和promise进行阻塞;
+            let _resolve;
+
+            await new Promise(function (resolve, reject) {
+                _resolve = resolve;
+                // resolve不执行,将其推入lock数组;
+                locks.push(_resolve);
+            })
+
+        }
+
+        if (urls.length > 0) {
+            count2++;
+            console.log('count2 ', count2);
+            await loadImg(urls.shift());
+            count2--;
+            locks.length && locks.shift()()
+        }
+    }
+
+    // 阻塞函数
+    function block() {
+        // 超过限制利用await和promise进行阻塞;
+        let _resolve;
+
+        return new Promise(function (resolve, reject) {
+            _resolve = resolve;
+            // resolve不执行,将其推入lock数组;
+            locks.push(_resolve);
+        })
+    }
+
+    function next() {
+        locks.length && locks.shift()()
+    }
+
+    async function two1() {
+        if (count2 >= 3) {
+            await block();
+        }
+
+        if (urls.length > 0) {
+            count2++;
+            console.log('count2 ', count2);
+            await loadImg(urls.shift());
+            count2--;
+            next();
+        }
+    }
+
+
+    for (let i = 0; i < len; i++) {
+        // two();
+        // two1();
+    }
+
+    // ============================================================
+    // 用 Promise.race来实现，先并发请求3个图片资源，这样可以得到 3 个 Promise实例，组成一个数组promises ，
+    // 然后不断的调用 Promise.race 来返回最快改变状态的 Promise，
+    // 然后从数组（promises ）中删掉这个 Promise 对象实例，再加入一个新的 Promise实例，直到全部的 url 被取完。
+    //省略代码
+    function limitLoad(urls, handler, limit) {
+        // 对数组做一个拷贝
+        let sequence = [].concat(urls)
+        let promises = [];
+
+        //并发请求到最大数
+        promises = sequence.splice(0, limit)
+            .map((url, index) => {
+                // 这里返回的 index 是任务在 promises 的脚标，
+                //用于在 Promise.race 之后找到完成的任务脚标
+                return handler(url).then(() => {
+                    return index
+                });
+            });
+
+        (async function loop() {
+            let p = Promise.race(promises);
+            for (let i = 0; i < sequence.length; i++) {
+                p = p.then((res) => {
+                    promises[res] = handler(sequence[i]).then(() => {
+                        return res
+                    });
+                    return Promise.race(promises)
+                })
+            }
+        })()
+    }
+
+    limitLoad(urls, loadImg, 3)
+
+</script>
+</html>

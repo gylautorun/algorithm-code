@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<input type="text" name="" id="input">
+<div id="show"></div>
+</body>
+<script>
+    let show = document.getElementById('show');
+    let input = document.getElementById('input');
+    let dataObj = {
+        valueObj: {
+            value: 'duyi'
+        },
+        name: 'haha'
+    }
+    //输入框事件：触发数据修改(写入)
+    input.oninput = function () {
+        dataObj.name = this.value;
+        // dataObj.valueObj.value = this.value;
+    }
+
+    //修改DOM数据（页面渲染）
+    function upDate() {
+        show.innerText = dataObj.name;
+        // show.innerText = dataObj.valueObj.value;
+    }
+
+    upDate(); // 初始数据渲染
+    // 给数据绑定监听
+    function Observer(data) {
+        if (!data || typeof data !== 'object') {
+            return data;
+        }
+
+        // Object.keys(data)不能获取数组的索引，所以Observer无法实现数据数据监听
+        Object.keys(data).forEach((item) => {
+            definedRective(data, item, data[item]); //
+        })
+    }
+
+    //数据监听：当setter被触发时，修改数据并渲染到页面
+    function definedRective(data, key, val) {
+        // 使用递归深度监听对象数据变化
+        // 例如：示例数据dataObj.valueObj.value的监听
+        Observer(val);
+        Object.defineProperty(data, key, {
+            get () {
+                return val;
+            },
+            set (newValue) {
+                if (newValue === val) return;
+                val = newValue;
+                upDate(); //数据渲染到DOM
+            }
+        })
+    }
+
+    Observer(dataObj);//给数据绑定监听方法
+</script>
+</html>

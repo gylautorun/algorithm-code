@@ -1,0 +1,47 @@
+/**
+ * map(callback, context)
+ *    callback(item, index, thisArr)
+ *         item: callback 数组中正在处理的当前元素
+ *         index: callback 数组中正在处理的当前元素的索引
+ *         thisArr: map 方法调用的数组
+ *    context: 执行 callback 函数时值被用作this
+ * return: new Array
+ */
+ Array.prototype.selfMap = function (callback, context) {
+     // 不能是 null 的调用
+     if (this === null) {
+         throw new TypeError(
+             'Array.prototype.reduce called on null or undefined'
+         )
+     }
+
+     // 第一个参数必须要为function
+     if (typeof callback !== 'function') {
+         throw new TypeError(callback + " is not a function");
+     }
+
+     let newArr = Array.prototype.slice.call(this);
+     // let result = [];
+     // for (let i = 0; i < newArr.length; i++) {
+     //     // 过滤稀疏数组, 即松散值
+     //     // if (!newArr.hasOwnProperty(i)) {
+     //     //     continue;
+     //     // }
+     //     result[i] = callback.call(context, newArr[i], i, this);
+     // }
+     //
+     // return result;
+
+     // or reduce
+     return newArr.reduce((res, current, i) => {
+         return [...res, callback.call(context, current, i, this)]
+     }, []);
+ };
+
+let test = [1, 2, 3, 4, 5];
+console.log(test.map(item => {
+    return item * 2;
+})); // [2, 4, 6, 8, 10]
+console.log(test.selfMap(item => {
+    return item * 2;
+})); // [2, 4, 6, 8, 10]

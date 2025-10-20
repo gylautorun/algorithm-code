@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Document</title>
+    <script src="./angular/jquery1.11.3.min.js"></script>
+	<script> 
+	//getElementById  获取标签的Id  得到的是标签
+		window.onload=function(){
+			function e(a){
+				var s = document.getElementById(a);
+				return s;
+			};
+			console.log(e('a'));
+            console.log(Array(3));
+			$('input').click(function(){
+                $.ajax({
+                    type: 'GET',
+
+                    url: '01.txt' ,
+
+                    data: {} ,
+                    dataType:'json',
+
+                    success: function (data){
+                        alert(data.a);
+                    },
+                    error: function (data){
+                        alert(data.a);
+                    }
+                });
+            })
+		};
+	</script>
+</head>
+<body id="a">
+<input type="button" value="按钮">
+</body>
+</html>
+

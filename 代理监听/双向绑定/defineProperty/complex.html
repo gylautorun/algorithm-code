@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>complex</title>
+</head>
+<body>
+<div>
+    <div>input请输入:</div>
+    <input type="text" id="input">
+    <p id="p"></p>
+</div>
+<div>
+    <ul id="list">
+    </ul>
+    <button type="button" name="button" id="btn-push">push列表</button>
+    <button type="button" name="button" id="btn-pop">pop列表</button>
+    <button type="button" name="button" id="btn-shift">shift列表</button>
+    <button type="button" name="button" id="btn-unshift">unshift列表</button>
+    <button type="button" name="button" id="btn-splice">splice列表</button>
+    <button type="button" name="button" id="btn-sort">sort列表</button>
+    <button type="button" name="button" id="btn-reverse">reverse列表</button>
+    <button type="button" name="button" id="btn-input">重置列表内容</button>
+</div>
+</body>
+<script src="../../defineProperty/arrayProto.js"></script>
+<script>
+    const CloneVue = (() => {
+        let uid = 0;
+        // 用于储存订阅者并发布消息
+        class Dep {
+            constructor() {
+                // 设置id,用于区分新Watcher和只改变属性值后新产生的Watcher
+                this.id = uid++;
+                // 储存订阅者的数组
+                this.subs = [];
+            }
+            // 触发target上的Watcher中的addDep方法,参数为dep的实例本身
+            depend() {
+                Dep.target.addDep(this);
+            }
+            // 添加订阅者
+            addSub(sub) {
+                this.subs.push(sub);
+            }
+            notify() {
+                // 通知所有的订阅者(Watcher)，触发订阅者的相应逻辑处理
+                this.subs.forEach(sub => sub.update());
+            }
+        }
+        // 为Dep类设置一个静态属性,默认为null,工作时指向当前的Watcher
+        Dep.target = null;
+        // 监听者,监听对象属性值的变化
+        class Observer {
+            constructor(value) {
+                this.value = value;
+                this.walk(value);
+            }
+            // 遍历属性值并监听
+            walk(value) {
+                Object.keys(value).forEach(key => this.convert(key, value[key]));
+            }
+            // 执行监听的具体方法
+            convert(key, val) {
+                defineReactive(this.value, key, val);
+            }
+        }
+
+        function defineReactive(obj, key, val) {
+            const dep = new Dep();
+            // 给当前属性的值添加监听 (对象)
+            let childOb = observe(val, dep);
+            Object.defineProperty(obj, key, {
+                enumerable: true,
+                configurable: true,
+                get() {
+                    // 如果Dep类存在target属性，将其添加到dep实例的subs数组中
+                    // target指向一个Watcher实例，每个Watcher都是一个订阅者
+                    // Watcher实例在实例化过程中，会读取data中的某个属性，从而触发当前get方法
+                    if (Dep.target) {
+                        dep.depend();
+                    }
+                    console.log('获取: ', key, val)
+                    return val;
+                },
+                set(newVal) {
+                    if (val === newVal) return;
+                    val = newVal;
+                    // 对新值进行监听  (对象)
+                    childOb = observe(newVal, dep);
+                    console.log('监听: ', key, val, newVal)
+                    // 通知所有订阅者，数值被改变了
+                    dep.notify();
+                },
+            });
+        }
+
+        function observe(value, Dep) {
+            // 当值不存在，或者不是复杂数据类型时，不再需要继续深入监听
+            if (!value || typeof value !== 'object') {
+                return;
+            }
+
+            if (Array.isArray(value)) {
+                // 重写原型
+                value.__proto__ = arrayProto(Dep);
+                // 传入的数据可能是多维度的,也需要执行响应式
+                for (let i = 0; i < value.length; i++) {
+                    observe(value[i])
+                }
+            }
+            else {
+                return new Observer(value);
+            }
+        }
+
+        // 订阅者
+        class Watcher {
+            constructor(vm, expOrFn, fn) {
+                this.depIds = {}; // hash储存订阅者的id,避免重复的订阅者
+                this.vm = vm; // 被订阅的数据一定来自于当前Vue实例
+                this.fn = fn; // 当数据更新时想要做的事情
+                this.expOrFn = expOrFn; // 被订阅的数据
+                this.val = this.get(); // 维护更新之前的数据
+            }
+            // 对外暴露的接口，用于在订阅的数据被更新时，由订阅者管理员(Dep)调用
+            update() {
+                this.run();
+            }
+            addDep(dep) {
+                // 如果在depIds的hash中没有当前的id,可以判断是新Watcher,因此可以添加到dep的数组中储存
+                // 此判断是避免同id的Watcher被多次储存
+                if (!this.depIds.hasOwnProperty(dep.id)) {
+                    dep.addSub(this);
+                    this.depIds[dep.id] = dep;
+                }
+            }
+            run() {
+                const val = this.get();
+                console.log(val);
+                this.val = val;
+                this.fn.call(this.vm, val, this.val);
+            }
+            get() {
+                // 当前订阅者(Watcher)读取被订阅数据的最新更新后的值时，通知订阅者管理员收集当前订阅者
+                Dep.target = this; // 将自己挂载到 Dep.target，调用 Dep.depend时会读取该变量
+                const val = this.vm._data[this.expOrFn];
+                // 置空，用于下一个Watcher使用
+                Dep.target = null;
+                return val;
+            }
+        }
+
+        // 完成Vue, 将上述方法挂载在Vue
+        class Vue {
+            constructor(options = {}) {
+                // 简化了$options的处理
+                this.$options = options;
+                // 简化了对data的处理
+                let data = (this._data = this.$options.data);
+                // 将所有data最外层属性代理到Vue实例上
+                Object.keys(data).forEach(key => this._proxy(key));
+                // 监听数据
+                observe(data);
+            }
+            // 对外暴露调用订阅者的接口，内部主要在指令中使用订阅者
+            $watch(expOrFn, fn) {
+                new Watcher(this, expOrFn, fn);
+            }
+            _proxy(key) {
+                Object.defineProperty(this, key, {
+                    configurable: true,
+                    enumerable: true,
+                    get() {
+                        return this._data[key];
+                    },
+                    set(val) {
+                        this._data[key] = val;
+                    },
+                });
+            }
+        }
+
+        return Vue;
+    })();
+
+    let demo = new CloneVue({
+        data: {
+            list: [1,2,3,4,5,6,7,8,9,10],
+            text: '',
+        },
+    });
+
+    const p = document.getElementById('p');
+    const input = document.getElementById('input');
+
+    input.addEventListener('keyup', (e) => {
+        demo.text = e.target.value;
+    });
+
+    demo.$watch('text', (str) => {
+        p.innerHTML = str
+    });
+
+
+    // ============== list ===========
+
+    function random(num) {
+       return Math.floor((Math.random() + 1) * num);
+    }
+
+    const list = document.getElementById('list');
+    const push = document.getElementById('btn-push');
+    const pop = document.getElementById('btn-pop');
+    const shift = document.getElementById('btn-shift');
+    const unshift = document.getElementById('btn-unshift');
+    const splice = document.getElementById('btn-splice');
+    const sort = document.getElementById('btn-sort');
+    const reverse = document.getElementById('btn-reverse');
+    const btnInput = document.getElementById('btn-input');
+
+    push.addEventListener('click', () => {
+        demo.list.push(random(10000));
+    });
+    pop.addEventListener('click', () => {
+        demo.list.pop();
+    });
+    shift.addEventListener('click', () => {
+        demo.list.shift();
+    });
+    unshift.addEventListener('click', () => {
+        demo.list.unshift('unshift');
+    });
+    splice.addEventListener('click', () => {
+        demo.list.splice(0, 5);
+    });
+    sort.addEventListener('click', () => {
+        demo.list.sort();
+    });
+    reverse.addEventListener('click', () => {
+        demo.list.reverse();
+    });
+    btnInput.addEventListener('click', () => {
+        demo.list = Array.from({length: random(10)}).map(v => random(1000))
+    });
+
+
+    const render = arr => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < arr.length; i++) {
+            const li = document.createElement('li');
+            li.textContent = arr[i];
+            fragment.appendChild(li);
+        }
+
+        for (let i = 0; i < list.children.length; i++) {
+            list.removeChild(list.children[i]);
+            i--;
+        }
+        list.appendChild(fragment);
+    };
+
+    demo.$watch('list', (list) => {
+        return render(list)
+    });
+
+    render(demo.list);
+
+
+
+</script>
+</html>

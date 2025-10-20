@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+<div id="root"></div>
+<script>
+    // 虚拟dom 结构数据
+    const domNode = {
+        tagName: 'ul',
+        props: {class: 'list'},
+        children: [
+            {
+                tagName: 'li',
+                props: {class: 'item'},
+                children: ['douyin']
+            },
+            {
+                tagName: 'li',
+                props: {class: 'item'},
+                children: ['toutiao']
+            }
+        ]
+    };
+    // 构建一个render 函数, 将 domNode 对象渲染以下dom
+    {/* 
+    <ul class="list">
+        <li class="item">douyin</li>
+        <li class="item">toutiao</li>
+    </ul>
+    */}
+
+    function Element({tagName, props, children}) {
+        if (!(this instanceof Element)) {
+            return new Element({tagName, props, children});
+        }
+        this.tagName = tagName;
+        this.props = props || {};
+        this.children = children || [];
+    }
+    Element.prototype.render = function () {
+        const that =  this;
+        const ele = document.createElement(that.tagName);
+        const props = that.props;
+        for (let key in props) {
+            ele.setAttribute(key, props[key]);
+        }
+
+        that.children.forEach(function(child) {
+            let childEle = null;
+            if (child instanceof Element) {
+                childEle = child.render();
+            }
+            else {
+                childEle = document.createTextNode(child);
+            }
+            ele.appendChild(childEle);
+        });
+
+        return ele;
+    }
+
+    function generateElement(data) {
+        if (data.children) {
+            data.children = data.children.map(generateElement)
+        }
+        return data.tagName ? Element(data) : data;
+    }
+    const element = generateElement(domNode);
+    document.getElementById('root').appendChild(element.render());
+
+    // console.log(element.render())
+
+
+</script>
+</body>
+</html>

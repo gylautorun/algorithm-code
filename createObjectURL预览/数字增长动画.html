@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数字增长动画</title>
+</head>
+<body>
+    <div>
+        <p>数字增长动画</p>
+        <div>
+            <input type="number" id="input" placeholder="起始值" />
+            <button id="button">计算</button>
+        </div>
+        <span id="number"></span>
+    </div>
+    </div>
+    <script>
+        /**
+         * 数字增长动画
+         * @param {number} start 起始值
+         * @param {number} end 结束值
+         * @param {number} duration 动画时长
+         * @param {Function} callback 动画结束后的回调函数
+         */
+        const numberAnimation = (options) => {
+            const {
+                start,
+                end,
+                duration,
+                callback,
+            } = options;
+            // 实现动画效果的代码
+            let current = start;
+            // 速度 = (结束值 - 起始值) / 时长
+            const speed = (end - start) / duration;
+            const startTime = Date.now();
+            const run = () => {
+                // 计算时间差
+                const diff = Date.now() - startTime;
+                // 判断是否结束: 时间差 >= 动画时长
+                if (diff >= duration) {
+                    current = end;
+                    if (callback) callback(current);
+                    return;
+                }
+                // 当前值 = 起始值 + 速度 * 时间差
+                current = start + speed * diff;
+                callback && callback(current);
+                // 继续执行
+                requestAnimationFrame(run);
+            };
+            run();
+        };
+        
+        const $number = document.getElementById('number');
+        const $input = document.getElementById('input');
+        const $button = document.getElementById('button');
+        
+
+        function setNumber(number, fixed = 3) {
+            numberAnimation({
+                start: 0,
+                end: number,
+                duration: 3000,
+                callback: (current) => {
+                    console.log('当前值: ', current);
+                    // 更新 DOM
+                    $number.textContent = current.toFixed(fixed);
+                },
+            });
+        }
+        function init() {
+            const number = 3782931.889;
+            $input.value = number;
+            setNumber(number);
+        }
+        init();
+
+        $button.addEventListener('click', () => {
+            const number = parseFloat($input.value);
+            console.log(number);
+            setNumber(number);
+        });
+
+        
+    </script>
+</body>
+</html>

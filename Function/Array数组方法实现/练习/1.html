@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+    <script src="http://apps.bdimg.com/libs/jquery/2.1.4/jquery.min.js"></script>
+
+</head>
+<body>	
+<div id="body">
+    
+        <ul  class="medicine clearfix" id="four">
+
+        </ul>
+    
+</div>
+
+<script>
+  var account = {
+	"drug":
+		[
+			{
+				"name":"兰释（氟伏沙明氟伏沙明氟伏沙明…",
+				"num":"X5",
+				"dose":"(0.3g*24片)"
+			},
+			{
+				"name":"沙明氟伏沙明氟伏沙明…",
+				"num":"X4",
+				"dose":"(0.3g*2片)"
+			},
+			{
+				"name":"沙家简单氟伏沙明氟伏沙明…",
+				"num":"X3",
+				"dose":"(0.2g*4片)"
+			}
+		]
+};
+   var obj=JSON.stringify(account);
+   console.log(obj);
+$("#four").append($.map(account.drug,function(value){
+	return '<li>'+value.name+'</li>'
+}));
+
+http://localhost:8088/assess-cpweb/login/qlogin/5AC5F51FDCDB37F24E6017852730B608CFC4F51BD633BCCDF416655505D34473
+</script>
+</body>
+<html>

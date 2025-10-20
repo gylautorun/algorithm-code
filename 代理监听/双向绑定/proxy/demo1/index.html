@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Document</title>
+</head>
+<body>
+<div>
+    <div>input请输入:</div>
+    <input type="text" id="input">
+    <p id="p"></p>
+</div>
+<div>
+    <ul id="list">
+    </ul>
+    <button type="button" name="button" id="btn-push">push列表</button>
+    <button type="button" name="button" id="btn-pop">pop列表</button>
+    <button type="button" name="button" id="btn-shift">shift列表</button>
+    <button type="button" name="button" id="btn-unshift">unshift列表</button>
+    <button type="button" name="button" id="btn-splice">splice列表</button>
+    <button type="button" name="button" id="btn-sort">sort列表</button>
+    <button type="button" name="button" id="btn-reverse">reverse列表</button>
+    <button type="button" name="button" id="btn-input">重置列表内容</button>
+</div>
+<!--<script src="./demo.js"></script>-->
+<script src="./publish.js"></script>
+<script>
+    function random(num) {
+        return Math.floor((Math.random() + 1) * num);
+    }
+
+    const proxy = {
+        list: [1,2,3,4,5,6,7,8,9,10],
+        text: '',
+    };
+    const proxyObj = reactive(proxy);
+
+    const p = document.getElementById('p');
+    const input = document.getElementById('input');
+
+    input.addEventListener('keyup', (e) => {
+        // 只操作js对象，引起dom变化（响应式）
+        proxyObj.text = e.target.value;
+    });
+
+
+
+    const list = document.getElementById('list');
+    const push = document.getElementById('btn-push');
+    const pop = document.getElementById('btn-pop');
+    const shift = document.getElementById('btn-shift');
+    const unshift = document.getElementById('btn-unshift');
+    const splice = document.getElementById('btn-splice');
+    const sort = document.getElementById('btn-sort');
+    const reverse = document.getElementById('btn-reverse');
+    const btnInput = document.getElementById('btn-input');
+
+    push.addEventListener('click', () => {
+        proxyObj.list.push(random(10000));
+    });
+    pop.addEventListener('click', () => {
+        proxyObj.list.pop();
+    });
+    shift.addEventListener('click', () => {
+        proxyObj.list.shift();
+    });
+    unshift.addEventListener('click', () => {
+        proxyObj.list.unshift('unshift');
+    });
+    splice.addEventListener('click', () => {
+        proxyObj.list.splice(0, 5);
+    });
+    sort.addEventListener('click', () => {
+        proxyObj.list.sort();
+    });
+    reverse.addEventListener('click', () => {
+        proxyObj.list.reverse();
+    });
+    btnInput.addEventListener('click', () => {
+        proxyObj.list = Array.from({length: random(10)}).map(v => random(1000))
+    });
+
+
+    const render = arr => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < arr.length; i++) {
+            const li = document.createElement('li');
+            li.textContent = arr[i];
+            fragment.appendChild(li);
+        }
+
+        for (let i = 0; i < list.children.length; i++) {
+            list.removeChild(list.children[i]);
+            i--;
+        }
+        list.appendChild(fragment);
+    };
+
+
+//    const double = computed(() => render(proxyObj.list));
+    effect(() => {
+        console.log("update");
+        // 数据变了，响应式执行以下代码 fn
+        // fn会包装一层格式，方便判断computed, effect
+        p.innerHTML = proxyObj.text;
+        render(proxyObj.list)
+    });
+</script>
+</body>
+</html>

@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+    var deckRevealedIncreasing = function(deck) {
+        if (deck.length === 0) {
+            return [];
+        }
+        deck.sort((a, b) => a - b);
+        let len = deck.length;
+
+        if (len <= 2) {
+            return deck;
+        }
+
+        for (let i = 1; i < len; i++) {
+            deck.splice(len - i, 0, deck.pop());
+        }
+
+        return deck;
+    };
+
+    console.log(deckRevealedIncreasing([3, 2]))
+
+    // var deckRevealedIncreasing = function (deck) {
+    //     deck.sort((x, y) => x - y);
+    //     let res = [];
+    //     while (deck.length > 0) {
+    //         if (res.length > 0) {
+    //             res.unshift(res.pop())
+    //         }
+    //         res.unshift(deck.pop())
+    //     }
+    //     return res;
+    // };
+</script>
+</html>

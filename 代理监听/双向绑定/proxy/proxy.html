@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Proxy</title>
+</head>
+<body>
+<p>请输入:</p>
+<input type="text" id="input">
+<p id="p"></p>
+</body>
+<script>
+    let input = document.getElementById('input');
+    let p = document.getElementById('p');
+    let obj = {};
+
+    let newObj = new Proxy(obj, {
+        get: function(target, key, receiver) {
+            console.log(`getting ${key}!`);
+            return Reflect.get(target, key, receiver);
+        },
+        set: function(target, key, value, receiver) {
+            console.log(target, key, value, receiver);
+            if (key === 'text') {
+                input.value = value;
+                p.innerHTML = value;
+            }
+            return Reflect.set(target, key, value, receiver);
+        },
+    });
+
+    input.addEventListener('keyup', function(e) {
+        newObj.text = e.target.value;
+    });
+
+</script>
+</html>

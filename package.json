@@ -1,0 +1,6 @@
+{
+    "scripts": {
+        "lru:link": "node ./lru/lru-link.js",
+        "lru": "node ./lru/lru.js"
+    }
+}

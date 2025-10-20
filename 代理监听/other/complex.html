@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>complex</title>
+</head>
+<body>
+<div>
+    <div>input请输入:</div>
+    <input type="text" id="input">
+    <p id="p"></p>
+</div>
+<div>
+    <ul id="list">
+    </ul>
+    <button type="button" name="button" id="btn-push">push列表</button>
+    <button type="button" name="button" id="btn-pop">pop列表</button>
+    <button type="button" name="button" id="btn-shift">shift列表</button>
+    <button type="button" name="button" id="btn-unshift">unshift列表</button>
+    <button type="button" name="button" id="btn-splice">splice列表</button>
+    <button type="button" name="button" id="btn-sort">sort列表</button>
+    <button type="button" name="button" id="btn-reverse">reverse列表</button>
+    <button type="button" name="button" id="btn-input">重置列表内容</button>
+</div>
+</body>
+<script>
+    const CloneVue = (() => {
+        // 用于储存订阅者并发布消息
+        class Dep {
+            constructor() {
+                // 储存订阅者的数组
+                this.subs = [];
+            }
+            // 添加订阅者
+            addSub(sub) {
+                if (sub && (this.subs.indexOf(sub) === -1)) {
+                    this.subs.push(sub)
+                    console.log(this.subs)
+                }
+            }
+            notify() {
+                // 通知所有的订阅者(Watcher)，触发订阅者的相应逻辑处理
+                this.subs.forEach(sub => sub.update());
+            }
+        }
+        // 为Dep类设置一个静态属性,默认为null,工作时指向当前的Watcher
+        Dep.target = null;
+
+        function observe(value) {
+
+            let dep = new Dep()
+
+            if (Object.prototype.toString.call(value) !== '[object Object]') {
+                return;
+            }
+
+            return new Proxy(value, {
+                get(target, key, receiver) {
+                    dep.addSub(Dep.target)
+                    if (typeof target[key] === 'object' && target[key] !== null) {
+                        return observe(target[key])
+                    }
+                    return Reflect.get(target, key, receiver);
+                },
+                set(target, key, value, receiver) {
+                    let newValue = Reflect.set(target, key, value, receiver)
+                    dep.notify()
+                    return newValue;
+                }
+            })
+
+        }
+
+        class Watcher {
+            constructor(value, getter) {
+                this.getter = getter
+                this.value = this.get()  // 维护更新之前的数据
+                this.val = value
+            }
+            // 对外暴露的接口，用于在订阅的数据被更新时，由订阅者管理员(Dep)调用
+            update() {
+                this.value = this.get()
+            }
+            get() {
+                // 当前订阅者(Watcher)读取被订阅数据的最新更新后的值时，通知订阅者管理员收集当前订阅者
+                Dep.target = this; // 将自己挂载到 Dep.target，调用 Dep.depend时会读取该变量
+                this.getter && this.getter();
+                // 置空，用于下一个Watcher使用
+                Dep.target = null;
+                console.log(Dep.target, 2);
+                return this.val;
+            }
+        }
+
+        class Vue {
+            constructor(options = {}) {
+                // 简化了$options的处理
+                this.$options = options;
+                this.render = options.render;
+                // 简化了对data的处理
+                this._data = this.$options.data;
+                // 监听数据
+                this.$data = observe(this._data);
+                new Watcher(this._data, () => {
+                    this.render()
+                })
+            }
+        }
+
+        return Vue;
+    })();
+
+    let demo = new CloneVue({
+        data: {
+            list: [1,2,3,4,5,6,7,8,9,10],
+            text: '',
+        },
+        render() {
+            const list = document.getElementById('list');
+            const fragment = document.createDocumentFragment();
+            for (let i = 0; i < this._data.list.length; i++) {
+                const li = document.createElement('li');
+                li.textContent = this._data.list[i];
+                fragment.appendChild(li);
+            }
+
+            for (let i = 0; i < list.children.length; i++) {
+                list.removeChild(list.children[i]);
+                i--;
+            }
+            list.appendChild(fragment);
+        }
+    });
+
+    const p = document.getElementById('p');
+    const input = document.getElementById('input');
+
+    input.addEventListener('keyup', (e) => {
+        demo.$data.text = e.target.value;
+    });
+
+
+    // ============== list ===========
+
+    function random(num) {
+       return Math.floor((Math.random() + 1) * num);
+    }
+
+    const list = document.getElementById('list');
+    const push = document.getElementById('btn-push');
+    const pop = document.getElementById('btn-pop');
+    const shift = document.getElementById('btn-shift');
+    const unshift = document.getElementById('btn-unshift');
+    const splice = document.getElementById('btn-splice');
+    const sort = document.getElementById('btn-sort');
+    const reverse = document.getElementById('btn-reverse');
+    const btnInput = document.getElementById('btn-input');
+
+    push.addEventListener('click', () => {
+        demo.$data.list.push(random(10000));
+    });
+    pop.addEventListener('click', () => {
+        demo.$data.list.pop();
+    });
+    shift.addEventListener('click', () => {
+        demo.$data.list.shift();
+    });
+    unshift.addEventListener('click', () => {
+        demo.$data.list.unshift('unshift');
+    });
+    splice.addEventListener('click', () => {
+        demo.$data.list.splice(0, 5);
+    });
+    sort.addEventListener('click', () => {
+        demo.$data.list.sort();
+    });
+    reverse.addEventListener('click', () => {
+        demo.$data.list.reverse();
+    });
+    btnInput.addEventListener('click', () => {
+        demo.$data.list = Array.from({length: random(10)}).map(v => random(1000))
+    });
+
+
+    const render = arr => {
+        const fragment = document.createDocumentFragment();
+        for (let i = 0; i < arr.length; i++) {
+            const li = document.createElement('li');
+            li.textContent = arr[i];
+            fragment.appendChild(li);
+        }
+
+        for (let i = 0; i < list.children.length; i++) {
+            list.removeChild(list.children[i]);
+            i--;
+        }
+        list.appendChild(fragment);
+    };
+
+    render(demo._data.list);
+
+
+
+</script>
+</html>

@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MutationObserver与多行打点的实现实例页面</title>
+    <style>
+        x-ell {
+            display: block;
+            width: 200px;
+            word-break: break-all;
+        }
+        x-ell > x-dot::before {
+            content: '...';
+            position: absolute;
+        }
+        x-ell > x-hidden {
+            position: absolute;
+            clip: rect(0 0 0 0);
+            font-size: 0;
+        }
+    </style>
+</head>
+<body>
+<x-ell rows="2">对于现代浏览器...组合如下。</x-ell>
+<p>
+    <button onClick="document.querySelector('x-ell').rows = '3';">点击设置rows为3</button>
+    <button onClick="document.querySelector('x-ell').innerText = '只有一行啦！';">文字内容变少</button>
+</p>
+</body>
+</html>
+<script>
+    /**
+     @description 本着演示目的，我们只考虑x-ell内部都是纯文本的情况
+     @author zhangxinxu(.com) from https://www.zhangxinxu.com/wordpress/?p=8925
+     @licence MIT，保留原作者和出处
+     */
+    [].slice.call(document.querySelectorAll('x-ell')).forEach(function (ell) {
+        ell.render = function () {
+            var rows = this.rows;
+            // 宽度，这里就clientWidth代替，padding之类就先不考虑
+            var width = this.clientWidth;
+            // 这里我们借助canvas做边界判断
+            var canvas = document.createElement('canvas');
+            var context = canvas.getContext('2d');
+            // 需要字号和字体
+            var computedStyle = window.getComputedStyle(this);
+            context.font = computedStyle.fontSize + ' ' + computedStyle.fontFamily;
+
+            // 所有文本内容
+            var text = this.textContent || this.innerText;
+
+            // 字符分隔为数组
+            var arrText = text.split('');
+            var textInit = '';
+            // 当前第几行
+            var line = 1;
+            // 中断点
+            var breakIndex = -1;
+            // 点点点的宽度
+            var widthDots = context.measureText('...').width;
+
+            for (var n = 0; n < arrText.length; n++) {
+                var testLine = textInit + arrText[n];
+                var metrics = context.measureText(testLine);
+                var testWidth = metrics.width;
+                if (testWidth > width) {
+                    if (line >= rows) {
+                        // 超出了
+                        var lastTextWidth = context.measureText(arrText[n - 1]).width;
+                        if (lastTextWidth >= widthDots) {
+                            breakIndex = n - 1;
+                        } else {
+                            breakIndex = n - 2;
+                        }
+                        break;
+                    } else {
+                        textInit = arrText[n];
+                        line++;
+                    }
+                } else {
+                    textInit = testLine;
+                }
+            }
+
+            if (breakIndex != -1) {
+                this.innerHTML = arrText.slice(0, breakIndex).join('') + '<x-dot aria-hidden="true"></x-dot><x-hidden>' + arrText.slice(breakIndex - arrText.length).join('') + '</x-hidden>';
+            }
+        };
+
+        // 重新定义rows属性
+        Object.defineProperty(ell, 'rows', {
+            writeable: true,
+            enumerable: true,
+            get: function () {
+                return this.getAttribute('rows');
+            },
+            set: function (rows) {
+                this.setAttribute('rows', rows);
+            }
+        });
+
+        // 打点显示
+        ell.render();
+
+        // 开始观察ell元素
+        var observer = new MutationObserver(function (mutationsList, mutationObserver) {
+            // mutationsList参数是个MutationRecord对象数组，描述了每个发生的变化
+            // mutationObserver参数就是调用了回调的MutationObserver
+            mutationsList.forEach(function (mutation) {
+                var target = mutation.target;
+                if (!target || !target.render) {
+                    return;
+                }
+                // 变化的类型
+                switch(mutation.type) {
+                    case 'characterData':
+                        // 文本内容变化
+                        target.render();
+                        break;
+                    case 'attributes':
+                        // rows属性值发生了变化
+                        target.render();
+                        break;
+                }
+            });
+        });
+
+        // 开始观察ell元素并制定观察内容
+        observer.observe(ell, {
+            attributes: true,
+            subtree: true,
+            characterData: true,
+            attributeFilter: ['rows']
+        });
+    });
+
+    /**
+     * MutationObserver检测DOM变化的套路都是固定的MutationObserver检测DOM变化的套路都是固定的
+     * 其实就两部分组成，如下：
+     * // part 1
+     * var observer = new MutationObserver(callback);
+     * // part 2
+     * observer.observe(node, options);
+     *
+     * 定义一个观察实例，实例方法中有个callback回调参数，然后开始观察指定node节点的变化，观察的内容由options参数决定。
+     *
+     * 由于callback是最后执行，所以我们先了解node, options这两个参数，再来看看callback中的参数。
+     */
+</script>
+

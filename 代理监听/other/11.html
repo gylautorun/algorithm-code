@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>手工vue</title>
+</head>
+<body>
+<div id="app"></div>
+<script>
+    (function () {
+        class Dep {
+            constructor() {
+                this.subs = []
+            }
+
+            addSub(sub) {
+                if (sub && (this.subs.indexOf(sub) === -1)) {
+                    this.subs.push(sub)
+                }
+            }
+
+            notify() {
+                this.subs.length > 0 && this.subs.forEach(sub => {
+                    sub.update()
+                })
+            }
+        }
+        Dep.depTarget = null;
+
+        class Watcher {
+            constructor(value, getter) {
+                this.getter = getter
+                this.value = this.get()
+                this.val = value
+            }
+
+            get() {
+                Dep.depTarget = this
+                this.getter()
+                Dep.depTarget = null
+                return this.val
+            }
+
+            update() {
+                this.value = this.get()
+            }
+        }
+
+        const typeTo = (val) => Object.prototype.toString.call(val)
+
+        function observe(obj) {
+            let dep = new Dep()
+
+            if (typeTo(obj) !== '[object Object]') {
+                return null
+            }
+
+            return new Proxy(obj, {
+                get(target, key, receiver) {
+                    dep.addSub(Dep.depTarget)
+                    return target[key];
+                },
+                set(target, key, value, receiver) {
+                    let newValue = Reflect.set(target, key, value, receiver)
+                    dep.notify()
+                    return newValue;
+                }
+            })
+        }
+
+        class Vue {
+            constructor(options) {
+                this.$options = options;
+                this._data = options.data();
+                this.render = options.render;
+                this.$el = typeof options.el === 'string' ?
+                    document.querySelector(options.el) :
+                    options.el;
+                this.$data = observe(this._data)
+                new Watcher(this._data, () => {
+                    this.$mount()
+                })
+            }
+
+            createElement(tagName, data, children) {
+                let element = document.createElement(tagName)
+                if (Object.prototype.toString.call(children) === '[object Array]') {
+                    children.forEach(child => {
+                        element.appendChild(child)
+                    });
+                } else {
+                    element.textContent = children
+                }
+                return element
+            }
+
+            $mount() {
+                const elements = this.render(this.createElement)
+                this.$el.innerHTML = ''
+                this.$el.appendChild(elements)
+            }
+        }
+
+        window.app = new Vue({
+            el: '#app',
+            data() {
+                return {
+                    info: {
+                        message: '个人信息'
+                    },
+                    age: 3
+                }
+            },
+            render(createElement) {
+                return createElement(
+                    'div', {
+                        attr: {
+                            title: this.$data.info.message
+                        }
+                    },
+                    [
+                        createElement('span', {}, `黑宝(我家猫)快${this.$data.age}岁了`)
+                    ]
+                )
+            }
+        });
+
+        setTimeout(() => {
+            window.app.$data.info.message = 4;
+            window.app.$data.age = 4;
+        }, 1000)
+    })();
+</script>
+</body>
+</html>

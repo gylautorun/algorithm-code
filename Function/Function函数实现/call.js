@@ -1,0 +1,49 @@
+/**
+ * call(target, arg1, arg2, ...) 方法使用一个指定的 this 值和单独给出的一个或多个参数来调用一个函数
+ *     target: 可选的。在 function 函数运行时使用的 this 值。
+ *        请注意，this可能不是该方法看到的实际值：
+ *              如果这个函数处于非严格模式下，则指定为 null 或 undefined 时会自动替换为指向全局对象，原始值会被包装
+ *     arg1, arg2, ...: 指定的参数列表
+ * @return 使用调用者提供的 this 值和参数调用该函数的返回值。若该方法没有返回值，则返回 undefined。
+ */
+Function.prototype.selfCall = function (target) {
+    target = target || global; // window;
+
+    // 利用对象调用指定 this
+    target.fn = this;
+
+    // 参数收集
+    let args = [];
+
+    let start = 1; // arguments[0]=== target, 故从下标1开始
+
+    for (let i = start, len = arguments.length; i < len; i++) {
+        args.push('arguments[' + i + ']');
+    }
+
+    // 利用eval展开参数 并执行函数
+    let result = eval('target.fn(' + args + ')');
+
+    // 删除附加对象属性 fn
+    delete target.fn;
+
+    return result;
+};
+
+// test - call
+let a = {
+    name: 'hyh'
+}
+let name = 'hyhaa';
+// var name = 'hyhaa';
+
+function exp(a, b) {
+    console.log(a + ' ' +  this.name + ' ' + b)
+}
+
+exp.call(null, 'happy', 'day') //happy undefined day
+exp.call(a, 'happy', 'day') //happy hyh day
+
+// test - selfCall
+exp.selfCall(null, 'happy', 'day') //happy undefined day
+exp.selfCall(a, 'happy', 'day') //happy hyh day

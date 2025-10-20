@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+
+</body>
+<script>
+
+    // 批量请求
+    // 可控制并发度
+    // 全部请求结束，执行 callback
+    // bad
+    function handleFetchQueueBad(urls = [], max, callback) {
+        let requestArr = [];
+
+        urls.forEach((url, idx) => {
+            let index = Math.floor(idx / max); // max 最大并发数
+            if (requestArr[index]) {
+                requestArr[index].push(url);
+            }
+            else {
+                // 初始给元素数组赋值
+                requestArr[index] = [url]
+            }
+        })
+        // requestArr [[], [], [], ...]
+        console.log(requestArr)
+
+        let handleRequest = reqs => {
+            let results = [];
+            reqs.forEach(req => {
+                fetch(req)
+                    .then(res => {
+                        if (results.push(res) === max) {
+                            if (requestArr.length < 1) {
+                                'function' === typeof callback && callback(results)
+                            } else {
+                                handleRequest(requestArr.shift())
+                            }
+                        }
+                    })
+                    .catch(e => {
+                        results.push(e)
+                    })
+            })
+        }
+
+        handleRequest(requestArr.shift());
+    }
+
+    /**
+     * 先并发最大并发量, 请求一个, 添加一个到并发组, 依次直到所有请求完成
+     * @param urls
+     * @param max
+     * @param callback
+     */
+    // good
+    function handleFetchQueue(urls = [], max, callback) {
+        let length = urls.length;
+        let requestsQueue = [];
+        let results = [];
+        let index = 0;
+
+        let handleRequest = url => {
+            let req = fetch(url)
+                .then(res => {
+                    results.push(res);
+                    let maxIdx = results.length - 1;
+                    if (maxIdx < length && index + 1 < length) {
+                        requestsQueue.shift();
+                        handleRequest(urls[++index])
+                    }
+                    else if (maxIdx === length) {
+                        'function' === typeof callback && callback(results)
+                    }
+                })
+                .catch(e => {
+                    results.push(e)
+                });
+            requestsQueue.push(req);
+            if (requestsQueue.length < max) {
+                handleRequest(urls[++index]);
+            }
+            else {
+                console.log(requestsQueue)
+            }
+        };
+
+        handleRequest(urls[index]);
+    }
+
+    let urls = Array.from({length: 10}, (v, k) => k);
+    let max = 4;
+    let callback = () => {
+        console.log('run callback');
+    };
+    let fetch = (idx) => {
+        return new Promise((resolve, reject) => {
+            console.log(`start request ${idx}`);
+            // 模拟请求时间
+            let timeout = parseInt(Math.random() * 10000); // 1e4 === 10000
+            setTimeout(() => {
+                console.log(`end request ${idx}`);
+                resolve(idx);
+            }, timeout)
+        })
+    }
+    handleFetchQueue(urls, max, callback);
+</script>
+</html>

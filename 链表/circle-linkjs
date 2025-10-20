@@ -1,0 +1,42 @@
+function Node(value) {
+    this.value = value;
+    this.next = null;
+    this.previous = null;
+}
+function CircleList() {
+    this.head = new Node('head');
+    // 加这一句
+    this.head.next = this.head;
+}
+CircleList.prototype.find = function(value) {
+    let currentNode = this.head;
+    while (currentNode.value !== value) {
+        currentNode = currentNode.next;
+    }
+    return currentNode;
+}
+CircleList.prototype.insert = function(value, target) {
+    const node = new Node(value);
+    const current = this.find(target);
+    node.next = current.next;
+    node.previous = current;
+    current.next = node;
+}
+CircleList.prototype.findLast = function(value) {
+    const node = this.head;
+    while (node.next !== null) {
+        node = node.next;
+    }
+    return node;
+}
+CircleList.prototype.remove = function(value) {
+    const current = this.find(value);
+    if (current.next !== null) {
+        current.previous.next = current.next;
+        current.next.previous = current.previous;
+        current.next = null;
+        current.previous = null;
+    }
+}
+
+module.exports = exports = CircleList;
